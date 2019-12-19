@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/FenixAra/go-log/log"
 	"github.com/FenixAra/go-prom/prom"
-	"github.com/FenixAra/go-util/log"
 )
 
 type httpwrapper struct {
