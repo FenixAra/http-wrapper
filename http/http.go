@@ -63,6 +63,15 @@ func (h *httpwrapper) MakeRequest(method, url, name string, req, res interface{}
 			request.Header.Set(k, v)
 		}
 
+		if len(h.c.queryParams) > 0 {
+			q := request.URL.Query()
+			for k, v := range h.c.queryParams {
+				q.Add(k, v)
+			}
+
+			request.URL.RawQuery = q.Encode()
+		}
+
 		response, err := client.Do(request)
 		if err != nil {
 			h.l.Errorf("Unable to send HTTP Req. Err: %+v", err)
@@ -75,6 +84,14 @@ func (h *httpwrapper) MakeRequest(method, url, name string, req, res interface{}
 
 			return 0, err
 		}
+
+		go h.l.Log(&log.Log{
+			DependancyName: name,
+			DependancyType: log.DependancyTypeHTTP,
+			TimeTaken:      time.Since(s).Seconds(),
+			Title:          url,
+			Message:        url,
+		})
 
 		if response.StatusCode >= http.StatusInternalServerError {
 			prom.TrackDependency(prom.DependencyHTTP, name, prom.StatusFailed, time.Since(s).Seconds())
@@ -132,6 +149,15 @@ func (h *httpwrapper) getRequest(method, url, name string, res interface{}) (int
 			request.Header.Set(k, v)
 		}
 
+		if len(h.c.queryParams) > 0 {
+			q := request.URL.Query()
+			for k, v := range h.c.queryParams {
+				q.Add(k, v)
+			}
+
+			request.URL.RawQuery = q.Encode()
+		}
+
 		response, err := client.Do(request)
 		if err != nil {
 			h.l.Errorf("Unable to send HTTP Req. Err: %+v", err)
@@ -144,6 +170,14 @@ func (h *httpwrapper) getRequest(method, url, name string, res interface{}) (int
 
 			return 0, err
 		}
+
+		go h.l.Log(&log.Log{
+			DependancyName: name,
+			DependancyType: log.DependancyTypeHTTP,
+			TimeTaken:      time.Since(s).Seconds(),
+			Title:          url,
+			Message:        url,
+		})
 
 		if response.StatusCode >= http.StatusInternalServerError {
 			prom.TrackDependency(prom.DependencyHTTP, name, prom.StatusFailed, time.Since(s).Seconds())

@@ -7,7 +7,9 @@ type Config struct {
 	// No of Retries in count - Default - 3
 	retries int
 	// Headers for the http request
-	headers     map[string]string
+	headers map[string]string
+	// Query params for the http request
+	queryParams map[string]string
 	retryFactor float64
 }
 
@@ -18,6 +20,7 @@ func NewConfig() *Config {
 		retries:     3,
 		headers:     make(map[string]string),
 		retryFactor: 2,
+		queryParams: make(map[string]string),
 	}
 }
 
@@ -40,4 +43,11 @@ func (c *Config) SetRetries(retries int) {
 // SetRetryFactor is used to set retry factor for exponential backoff
 func (c *Config) SetRetryFactor(factor float64) {
 	c.retryFactor = factor
+}
+
+// AddQueryParam adds query param to add to the request.
+// k - key of query param
+// v - Value of the param
+func (c *Config) AddQueryParam(k, v string) {
+	c.queryParams[k] = v
 }
