@@ -85,14 +85,6 @@ func (h *httpwrapper) MakeRequest(method, url, name string, req, res interface{}
 			return 0, err
 		}
 
-		go h.l.Log(&log.Log{
-			DependancyName: name,
-			DependancyType: log.DependancyTypeHTTP,
-			TimeTaken:      time.Since(s).Seconds(),
-			Title:          url,
-			Message:        url,
-		})
-
 		if response.StatusCode >= http.StatusInternalServerError {
 			prom.TrackDependency(prom.DependencyHTTP, name, prom.StatusFailed, time.Since(s).Seconds())
 			h.l.Errorf("Response code is greater than 500. Code: %d", response.StatusCode)
@@ -170,14 +162,6 @@ func (h *httpwrapper) getRequest(method, url, name string, res interface{}) (int
 
 			return 0, err
 		}
-
-		go h.l.Log(&log.Log{
-			DependancyName: name,
-			DependancyType: log.DependancyTypeHTTP,
-			TimeTaken:      time.Since(s).Seconds(),
-			Title:          url,
-			Message:        url,
-		})
 
 		if response.StatusCode >= http.StatusInternalServerError {
 			prom.TrackDependency(prom.DependencyHTTP, name, prom.StatusFailed, time.Since(s).Seconds())
