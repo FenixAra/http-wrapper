@@ -10,7 +10,11 @@ type Config struct {
 	headers map[string]string
 	// Query params for the http request
 	queryParams map[string]string
+	// The exponential factor used for exponential back off
 	retryFactor float64
+	// Basic auth username and password
+	username string
+	password string
 }
 
 // NewConfig Creates and initialises config to default values
@@ -50,4 +54,10 @@ func (c *Config) SetRetryFactor(factor float64) {
 // v - Value of the param
 func (c *Config) AddQueryParam(k, v string) {
 	c.queryParams[k] = v
+}
+
+// Set Basic Auth credentials (username and password)
+func (c *Config) SetBasicAuth(username, password string) {
+	c.username = username
+	c.password = password
 }

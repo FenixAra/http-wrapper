@@ -63,6 +63,10 @@ func (h *httpwrapper) MakeRequest(method, url, name string, req, res interface{}
 			request.Header.Set(k, v)
 		}
 
+		if h.c.username != "" {
+			request.SetBasicAuth(h.c.username, h.c.password)
+		}
+
 		if len(h.c.queryParams) > 0 {
 			q := request.URL.Query()
 			for k, v := range h.c.queryParams {
@@ -139,6 +143,10 @@ func (h *httpwrapper) getRequest(method, url, name string, res interface{}) (int
 
 		for k, v := range h.c.headers {
 			request.Header.Set(k, v)
+		}
+
+		if h.c.username != "" {
+			request.SetBasicAuth(h.c.username, h.c.password)
 		}
 
 		if len(h.c.queryParams) > 0 {
