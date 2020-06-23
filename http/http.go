@@ -89,9 +89,15 @@ func (h *httpwrapper) MakeRequest(method, url, name string, req, res interface{}
 			return 0, err
 		}
 
+		content, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			h.l.Errorf("Unable to read HTTP Response. Err: %+v", err)
+			return response.StatusCode, err
+		}
+
 		if response.StatusCode >= http.StatusInternalServerError {
 			prom.TrackDependency(prom.DependencyHTTP, name, prom.StatusFailed, time.Since(s).Seconds())
-			h.l.Errorf("Response code is greater than 500. Code: %d", response.StatusCode)
+			h.l.Errorf("Response code is greater than 500. Code: %d, Response: %s", response.StatusCode, string(content))
 			time.Sleep(time.Second * time.Duration(int(math.Pow(h.c.retryFactor, float64(retries)))))
 			retries++
 			if retries < h.c.retries {
@@ -103,18 +109,12 @@ func (h *httpwrapper) MakeRequest(method, url, name string, req, res interface{}
 
 		if response.StatusCode >= http.StatusBadRequest {
 			prom.TrackDependency(prom.DependencyHTTP, name, prom.StatusFailed, time.Since(s).Seconds())
-			h.l.Errorf("Response code is between 400 To 499. Code: %d", response.StatusCode)
+			h.l.Errorf("Response code is between 400 To 499. Code: %d, Response: %s", response.StatusCode, string(content))
 			return response.StatusCode, err
 		}
 
 		prom.TrackDependency(prom.DependencyHTTP, name, prom.StatusSuccess, time.Since(s).Seconds())
 		if res != nil {
-			content, err := ioutil.ReadAll(response.Body)
-			if err != nil {
-				h.l.Errorf("Unable to read HTTP Response. Err: %+v", err)
-				return response.StatusCode, err
-			}
-
 			err = json.Unmarshal(content, &res)
 			if err != nil {
 				h.l.Errorf("Unable to unmarshal HTTP Response. Err: %+v", err)
